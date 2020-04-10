@@ -43,14 +43,13 @@ client.on('message', async message => {
 
   const waiting = await message.reply('Buscando islas, perame...');
   const islands = await turnipExchange.getIslands({ ...params });
-  waiting.delete();
 
   if (islands.length) {
     const toSend = prepareIslandsMessage(islands, params);
-    await message.reply('Aquí te van las mejores islas: \n\n');
+    await waiting.edit('Aquí te van las mejores islas: \n\n');
     await message.channel.send(toSend, { split: true });
   } else {
-    await message.reply('Oh no... parece que no hay islas con ese precio :cry:');
+    await waiting.edit('Oh no... parece que no hay islas con ese precio :cry:');
   }
 });
 
