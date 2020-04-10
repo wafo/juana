@@ -1,0 +1,20 @@
+{
+  "name": "juana",
+  "version": "0.1.0",
+  "description": "Informe de los precios de \"turnis\" más chilos desde https://turnip.exchange/",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Wafo",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^4.0.0",
+    "discord.js": "^12.1.1",
+    "dotenv": "^8.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "prettier": "^1.19.1"
+  }
+}
