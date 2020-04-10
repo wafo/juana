@@ -33,9 +33,16 @@ function filterIslands(islands, { islandMode, minPrice }) {
     filtered = islands.filter(x => x.commerce === islandMode);
   }
   if (minPrice) {
-    filtered = islands.filter(x => x.turnipPrice >= minPrice);
+    filtered = islands.filter(x => x.turnipPrice >= Math.abs(minPrice));
   }
-  return filtered.sort((a, b) => b.turnipPrice - a.turnipPrice).slice(0, 5);
+  if (minPrice && Math.sign(minPrice) === -1) {
+    // If price is negative sort by queue
+    filtered = filtered.sort((a, b) => a.queued - b.queued);
+  } else {
+    // If not sorting by queue sort by price
+    filtered = filtered.sort((a, b) => b.turnipPrice - a.turnipPrice);
+  }
+  return filtered.slice(0, 5);
 }
 
 async function getIslands(filters) {
