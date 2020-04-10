@@ -1,2 +1,2 @@
-require("dotenv").config();
-require("./discord");
+require('dotenv').config();
+require('./discord');
