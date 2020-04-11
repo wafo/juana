@@ -1,17 +1,17 @@
 const { default: axios } = require('axios');
-const logger = require('../logger');
-// const islands = require('../test-islands.json');
+const logger = require('../utils/logger');
+const { challengeAnswer } = require('../utils/hash');
+// const islands = require('../utils/test-islands.json');
 
 const api = axios.create({
   baseURL: process.env['TURNIP_URL'],
   headers: {
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
+    'user-agent': process.env['USER_AGENT'],
     'content-type': 'application/json',
-    origin: 'https://turnip.exchange',
-    referer: 'https://turnip.exchange/islands',
-    'x-kpsdk-ct':
-      'T41gNRNorUyyk7fS2VaabA==::KMK5PYcioIYPBZw1pEu6nFOBO4cziAv0O0v80VZrfosQ2HKEm9/rGKWkHEvzqzfS1Mavr9/Ie9QEtj5Xdqz/SlH5Apg7UCVsqvr5r1vq/+zp7WwzeMsUrYb3YqJoCq61Jiu1uyvDB9TmriLNkjEVEx+Ek1QzHr/oj/NuXOjq3mdUhLWR4i9QhC56Nydql97k5fAJ5O58lI9a3NI0+U1UaHuFuOXtFfXwfKTxSBoP6eWDBSZxtF/JuN0H9n9jY2fjJJ8/JmeRsoSbVLk2FscU8fvsgVCkIYxJhBMth2wbxvYXL31hWa11L1SSbYy08HC9nNMLGaW5PWO3Pb154zSt5UpMYl23EfRMrcIDk08HMOSVkDM12OjveKfZp4B/SCXTYYqGUPoYY/GmnBMfiOwgw/btzwARe0mbf3a8Slkcr+099ZUCq8uEVj1yY0gaCEScHRKT97TAcwFrCd01R/UtuVDBfIigcIjcVvOgTqwWusW8QzUhk9v56ghGW+Y6gP/s0kEUicKitYrWcIsoIFAEEA==',
-    'x-kpsdk-fp': '11aa3aa6-b4fe-c26c-fb00-55e020a90582',
+    origin: process.env['ORIGIN'],
+    referer: process.env['REFERER'],
+    'x-kpsdk-ct': process.env['X-KPSDK-CT'],
+    'x-kpsdk-fp': process.env['X-KPSDK-FP'],
   },
 });
 
@@ -57,6 +57,81 @@ async function getIslands(filters) {
   }
 }
 
+async function getIsland(turnipCode) {
+  try {
+    const response = await api.get(`/island/${turnipCode}`);
+    if (response.success) {
+      return response.islandInfo;
+    }
+    return null;
+  } catch (error) {
+    console.error(error);
+    logger.error('Problem fetching island');
+  }
+}
+
+async function checkQueue(turnipCode, visitorID) {
+  try {
+    const response = await api.get(`/island/queue/${turnipCode}`, {
+      params: {
+        visitorID,
+      },
+    });
+    if (response.success) {
+      return response;
+    }
+    return null;
+  } catch (error) {
+    console.error(error);
+    logger.error('Problema con el queue');
+  }
+}
+
+async function challenge() {
+  try {
+    const response = await api.post(`/149e9513-01fa-4fb0-aad4-566afd725d1b/2d206a39-8ed7-437e-a3be-862e0f06eea3/challenge`);
+    const answer = challengeAnswer(response.answerHash, response.seed);
+    return {
+      answer,
+      challengeID: response.challengeID,
+    };
+  } catch (error) {
+    logger.error('Problem with challenge. Expired uuids?');
+    return null;
+  }
+}
+
+async function enterQueue(turnipCode, visitorID, { challengeID, answer, name }) {
+  try {
+    const response = await api.put(
+      `/island/queue/${turnipCode}`,
+      {
+        name,
+      },
+      {
+        params: {
+          visitorID,
+        },
+        headers: {
+          'x-challenge-answer': answer,
+          'x-challenge-id': challengeID,
+        },
+      },
+    );
+    if (response.success) {
+      return response;
+    }
+    return null;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
 module.exports = {
   getIslands,
+  getIsland,
+  checkQueue,
+  challenge,
+  enterQueue,
 };
