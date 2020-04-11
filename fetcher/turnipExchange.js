@@ -101,7 +101,7 @@ async function challenge() {
   }
 }
 
-async function enterQueue(turnipCode, visitorID, { challengeID, answer, name }) {
+async function enterQueue({ turnipCode, visitorID, challengeID, answer, name }) {
   try {
     const response = await api.put(
       `/island/queue/${turnipCode}`,

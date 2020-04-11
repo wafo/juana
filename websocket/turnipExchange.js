@@ -8,15 +8,13 @@ const logger = require('../utils/logger');
 const wsUrl = process.env['TURNIP_WS'];
 
 function socketOnOpen(ws, { turnipCode, visitorID }) {
-  logger.socket('Connection opened');
-
-  const join = {
-    action: 'join',
-    turnipCode,
-    visitorID,
-  };
-
-  ws.send(JSON.stringify(join));
+  ws.send(
+    JSON.stringify({
+      action: 'join',
+      turnipCode,
+      visitorID,
+    }),
+  );
 }
 
 function socketOnMessage(ws, data, socketCallback) {
@@ -41,9 +39,8 @@ function socketOnMessage(ws, data, socketCallback) {
 
 function createSocket(socketCallback, { turnipCode, visitorID, userId }) {
   try {
-    logger.socket('Opening connection');
     if (!wsUrl) {
-      logger.error('TURNIP_WSs not available');
+      logger.error('TURNIP_WS not available');
       return null;
     }
 
@@ -62,8 +59,6 @@ function createSocket(socketCallback, { turnipCode, visitorID, userId }) {
     console.error(error);
   }
 }
-
-// createSocket('defaf24a');
 
 module.exports = {
   createSocket,

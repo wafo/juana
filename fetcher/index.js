@@ -1,5 +1,5 @@
-const turnipExchange = require('./turnipExchange');
+const turnipFetcher = require('./turnipExchange');
 
 module.exports = {
-  turnipExchange,
+  turnipFetcher,
 };
