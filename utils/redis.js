@@ -8,8 +8,8 @@ const client = redis.createClient(process.env.REDIS_PORT, process.env.REDIS_HOST
 const userBase = {
   id: '',
   name: '',
+  queue: null,
   visitorID: null,
-  onQueue: false,
   visitingIsland: null,
   suggestedIslands: [],
 };
@@ -46,9 +46,38 @@ async function getSuggestedIsland(id, index) {
   }
 }
 
+async function updateVisitingIsland(id, island) {
+  const user = await getUser(id);
+  await client.setAsync(id, JSON.stringify({ ...user, visitingIsland: island }));
+  return true;
+}
+
+async function updateQueue(id, queue) {
+  const user = await getUser(id);
+  await client.setAsync(id, JSON.stringify({ ...user, queue }));
+  return true;
+}
+
+async function cleanUser(id) {
+  const user = await getUser(id);
+  await client.setAsync(
+    id,
+    JSON.stringify({
+      ...userBase,
+      id: user.id,
+      name: user.name,
+      visitorID: user.visitorID,
+    }),
+  );
+  return true;
+}
+
 module.exports = {
   addUser,
   getUser,
+  cleanUser,
   updateUserSuggestedIslands,
   getSuggestedIsland,
+  updateVisitingIsland,
+  updateQueue,
 };

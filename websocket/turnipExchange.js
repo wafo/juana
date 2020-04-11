@@ -1,5 +1,6 @@
 const WebSocket = require('ws');
 const logger = require('../utils/logger');
+const redis = require('../utils/redis');
 
 // TODO:
 // > Handle createSocket errors...
@@ -17,7 +18,7 @@ function socketOnOpen(ws, { turnipCode, visitorID }) {
   );
 }
 
-function socketOnMessage(ws, data, socketCallback) {
+async function socketOnMessage(ws, data, socketCallback) {
   const dataObj = JSON.parse(data);
 
   switch (dataObj.action) {
@@ -26,12 +27,34 @@ function socketOnMessage(ws, data, socketCallback) {
       break;
     case 'queueUpdated':
       break;
-    case 'islandUpdated':
+    case 'islandUpdated': {
+      let message = `**Hubo un update:**\n`;
+      message = message.concat(`**Cerrada:** ${!!dataObj.data.locked}\n`);
+      message = message.concat(`**En pausa:** ${!!dataObj.data.paused}\n`);
+      message = message.concat(`**Descripción:** ${dataObj.data.description}`);
+
+      await socketCallback({
+        id: ws.userId,
+        message,
+      });
       break;
+    }
     case 'alert':
       break;
-    case 'kick':
+    case 'kick': {
+      let message = `**Oh no, te sacaron de la cola :cry:**\n`;
+      message = message.concat('Por alguna razón el dueño de la isla te saco de la cola.');
+
+      await socketCallback({
+        id: ws.userId,
+        message,
+      });
+
+      await redis.cleanUser();
+      ws.close();
+
       break;
+    }
     default:
       break;
   }

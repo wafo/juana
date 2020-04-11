@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-const { v4: uuid } = require('uuid');
 const { turnipFetcher } = require('../fetcher');
 const { turnipSocket } = require('../websocket');
 const redis = require('../utils/redis');
@@ -9,7 +8,14 @@ const logger = require('../utils/logger');
 const tokenDiscord = process.env['DISCORD_TOKEN'];
 const botPrefix = process.env['BOT_PREFIX'];
 
-function handleSocket() {}
+async function handleSocket({ id, message }) {
+  try {
+    const user = await client.users.fetch(id);
+    user.send(message);
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 const client = new Discord.Client();
 
@@ -42,22 +48,29 @@ client.on('message', async message => {
       turnipSocket.createSocket(handleSocket, { turnipCode: params.turnipCode, visitorID: user.visitorID, userId: user.id });
 
       const island = await turnipFetcher.getIsland(params.turnipCode);
-      if (!island) break;
+      if (!island || island.locked || island.paused) break;
+      await redis.updateVisitingIsland(user.id, island);
 
-      const queue = await turnipFetcher.checkQueue(params.turnipCode, user.visitorID);
-      if (!queue) break;
+      const checkQueue = await turnipFetcher.checkQueue(params.turnipCode, user.visitorID);
+      if (!checkQueue) break;
 
       const challengeAnswer = await turnipFetcher.challenge();
-      const enterQueue = await turnipFetcher.enterQueue({
+      const queue = await turnipFetcher.enterQueue({
         turnipCode: params.turnipCode,
         visitorID: user.visitorID,
         challengeID: challengeAnswer.challengeID,
         answer: challengeAnswer.answer,
         name: user.name,
       });
-      if (!enterQueue) break;
+      if (!queue) break;
+      await redis.updateQueue(user.id, queue.$id);
 
-      await message.reply('Todo en orden, estas en la cola. Te mantendré informado por DM');
+      await message.reply(`Estas en el lugar ${queue.yourPlace} de ${queue.maxQueue}. Te mantendré informado por DM`);
+
+      // TODO:
+      // Confirmation when you receive the PIN
+      // How to alert that you're finish
+
       return;
     }
     case 'help':
@@ -66,7 +79,8 @@ client.on('message', async message => {
       return;
   }
 
-  await message.reply('Ups, hubo un problema con tu petición.');
+  // await handleSocket({ id: user.id, message: 'Ups, no entendí tú mensaje. Tal vez esto te ayude: ...' });
+  await message.reply('Ups, hubo un problema con tu petición');
 });
 
 client.on('error', error => {
