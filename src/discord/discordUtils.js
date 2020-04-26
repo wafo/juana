@@ -1,4 +1,4 @@
-const redis = require('../utils/redis');
+// const redis = require('../utils/redis');
 const { v4: uuid } = require('uuid');
 const moment = require('moment');
 
@@ -69,8 +69,22 @@ function prepareIslandsMessage(islands, description = false) {
   }, '');
 }
 
+function preparePatternMessage({ mostLikely, average }) {
+  const percent = Number.isFinite(mostLikely.probability) ? (mostLikely.probability * 100).toPrecision(3) : '';
+
+  let msg = `estas son las predicciones:\n`;
+  msg = msg.concat(`**Patrón más probable:** ${mostLikely.pattern_description} con ${percent}%\n`);
+  msg = msg.concat(`**Mínimo garantizado:** ${average.weekGuaranteedMinimum}\n`);
+  msg = msg.concat(`**Máximo potencial:** ${average.weekMax}\n`);
+
+  msg = msg.concat('\n');
+
+  return msg;
+}
+
 module.exports = {
   prepareUser,
   getParams,
   prepareIslandsMessage,
+  preparePatternMessage,
 };

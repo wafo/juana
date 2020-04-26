@@ -1,20 +1,29 @@
 const Discord = require('discord.js');
-const logger = require('../utils/logger');
+const discord = require('./discordUtils');
 const { calculateOutput } = require('../predictor');
+const logger = require('../utils/logger');
 
 // Temporal
 const user = {
   firstTimeBuyer: false,
-  previousPattern: 2,
+  previousPattern: 4,
   previousSellingPrice: 106,
   weekPrices: [
+    [92, 115],
+    [NaN, NaN],
+    [NaN, NaN],
+    [NaN, NaN],
+    [NaN, NaN],
+    [NaN, NaN],
+  ],
+  /* weekPrices: [
     [92, 87],
     [85, 82],
     [77, 72],
     [68, 64],
     [59, 54],
     [51, 45],
-  ],
+  ], */
 };
 
 const tokenDiscord = process.env['DISCORD_TOKEN'];
@@ -27,20 +36,29 @@ client.on('ready', () => {
 });
 
 client.on('message', async message => {
-  if (!message.content.startsWith(botPrefix) || message.author.bot) return;
+  try {
+    if (!message.content.startsWith(botPrefix) || message.author.bot) return;
 
-  // TODO: Change this to new functions
-  // const user = await discord.prepareUser(message);
-  // const params = await discord.getParams(message, user.id);
+    // TODO: Change this to new functions
+    // const user = await discord.prepareUser(message);
+    // const params = await discord.getParams(message, user.id);
 
-  // TODO: React to params.
+    // TODO: React to params.
 
-  const { graph } = await calculateOutput(user.firstTimeBuyer, user.previousPattern, user.previousSellingPrice, user.weekPrices);
-  const attachment = new Discord.MessageAttachment(graph);
+    const { graph, patterns } = await calculateOutput(
+      user.firstTimeBuyer,
+      user.previousPattern,
+      user.previousSellingPrice,
+      user.weekPrices,
+    );
 
-  message.reply('Aqui te va una imagen', attachment);
+    const patternMsg = discord.preparePatternMessage(patterns);
 
-  // message.reply('Ups, hubo un problema con tú petición');
+    const graphAttachment = new Discord.MessageAttachment(graph);
+    message.reply(patternMsg, graphAttachment);
+  } catch (error) {
+    message.reply('Hubo un error. ¿Estan bien tus valores?');
+  }
 });
 
 client.on('error', error => {

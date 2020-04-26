@@ -12,11 +12,17 @@ async function calculateOutput(firstTimeBuyer, previousPattern, previousSellingP
 
   const analyzedPossibilities = predictor.analyze_possibilities();
 
+  // First element of array is the average
+  const mostLikely = analyzedPossibilities.slice(1).sort((a, b) => b.probability - a.probability)[0];
+
   const graph = await createChart(prices, analyzedPossibilities);
 
   return {
     graph,
-    analyzedPossibilities,
+    patterns: {
+      mostLikely,
+      average: analyzedPossibilities[0],
+    },
   };
 }
 

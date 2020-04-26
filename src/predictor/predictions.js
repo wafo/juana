@@ -3,7 +3,7 @@ const PATTERN = {
   LARGE_SPIKE: 1,
   DECREASING: 2,
   SMALL_SPIKE: 3,
-  ALL: 4,
+  ALL: 4, // Also IDK for the calculation
 };
 
 const PROBABILITY_MATRIX = {
