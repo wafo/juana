@@ -28,6 +28,7 @@ client.on('message', async message => {
         await redis.updatePreviousSellingPrice(user.id, params.price);
         break;
       }
+      case 'newweek':
       case 'reset': {
         await redis.resetUser(user.id, params.price, params.pattern);
         break;

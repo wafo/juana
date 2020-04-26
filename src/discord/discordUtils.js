@@ -40,6 +40,7 @@ async function getParams(message) {
     .split(' ');
 
   switch (params[0]) {
+    case 'newweek':
     case 'reset':
     case 'selling':
       if (!params[1]) {
@@ -117,12 +118,12 @@ function helpMessage() {
     `Actualiza el precio de venta del último domingo. Este dato es muy importante para la predicción!\n`,
   );
   msg = msg.concat(`*Ejemplo !juana selling 90*\n\n`);
-  msg = msg.concat(`**!juana reset [precio] [patrón]**\n`);
+  msg = msg.concat(`**!juana newweek [precio] [patrón]**\n`);
   msg = msg.concat(
     `Reinicia completamente tú semana y actualiza el precio de venta del último domingo, así como el patrón de la semana pasada (opcional).\n`,
   );
   msg = msg.concat(`Si no especificas patrón, automáticamente se toma el de la semana pasada.\n`);
-  msg = msg.concat(`*Ejemplo: !juana reset 90 3*\n\n`);
+  msg = msg.concat(`*Ejemplo: !juana newweek 90 3*\n\n`);
   msg = msg.concat(`**Patrones:**\n`);
   msg = msg.concat('```');
   msg = msg.concat(`0: Fluctuante\n`);
