@@ -3,7 +3,7 @@ const { createChart } = require('../graphs');
 
 async function calculateOutput(firstTimeBuyer, previousPattern, previousSellingPrice, weekPrices) {
   let prices = weekPrices.reduce((accumulator, price) => {
-    return [...accumulator, price[0], price[1]];
+    return [...accumulator, price[0] || NaN, price[1] || NaN];
   }, []);
 
   prices = [previousSellingPrice, previousSellingPrice, ...prices];

@@ -8,18 +8,25 @@ const client = redis.createClient(process.env.REDIS_PORT, process.env.REDIS_HOST
 const userBase = {
   id: '',
   name: '',
-  queue: null,
-  visitorID: null,
-  visitingIsland: null,
-  suggestedIslands: [],
+  firstTimeBuyer: false,
+  previousPattern: 4,
+  currentPattern: 4,
+  previousSellingPrice: 100,
+  weekPrices: [
+    [null, null],
+    [null, null],
+    [null, null],
+    [null, null],
+    [null, null],
+    [null, null],
+  ],
 };
 
-async function addUser(id, name, visitorID) {
+async function addUser(id, name) {
   const newUser = {
     ...userBase,
     id: id,
     name: name,
-    visitorID: visitorID,
   };
   await client.setAsync(id, JSON.stringify(newUser));
   return newUser;
@@ -30,54 +37,66 @@ async function getUser(id) {
   return JSON.parse(user);
 }
 
-async function updateUserSuggestedIslands(id, islands) {
+async function resetUser(id, previousSellingPrice, pattern) {
   const user = await getUser(id);
-  await client.setAsync(id, JSON.stringify({ ...user, suggestedIslands: islands }));
-  return true;
+
+  const resetedUser = {
+    ...user,
+    firstTimeBuyer: false,
+    previousPattern: pattern ? pattern : user.currentPattern,
+    currentPattern: 4,
+    previousSellingPrice,
+    weekPrices: userBase.weekPrices,
+  };
+
+  await client.setAsync(id, JSON.stringify(resetedUser));
+  return resetedUser;
 }
 
-async function getSuggestedIsland(id, index) {
-  try {
-    const user = await getUser(id);
-    const island = user.suggestedIslands[index - 1];
-    return island;
-  } catch (error) {
-    return null;
-  }
+async function updatePreviousSellingPrice(id, previousSellingPrice) {
+  const user = await getUser(id);
+
+  const updatedUser = {
+    ...user,
+    previousSellingPrice,
+  };
+
+  await client.setAsync(id, JSON.stringify(updatedUser));
+  return updatedUser;
 }
 
-async function updateVisitingIsland(id, island) {
+async function updateCurrentPattern(id, pattern) {
   const user = await getUser(id);
-  await client.setAsync(id, JSON.stringify({ ...user, visitingIsland: island }));
-  return true;
+
+  const updatedUser = {
+    ...user,
+    currentPattern: pattern,
+  };
+
+  await client.setAsync(id, JSON.stringify(updatedUser));
+  return updatedUser;
 }
 
-async function updateQueue(id, queue) {
+async function updateBuyingPrice(id, day, time, price) {
   const user = await getUser(id);
-  await client.setAsync(id, JSON.stringify({ ...user, queue }));
-  return true;
-}
 
-async function cleanUser(id) {
-  const user = await getUser(id);
-  await client.setAsync(
-    id,
-    JSON.stringify({
-      ...userBase,
-      id: user.id,
-      name: user.name,
-      visitorID: user.visitorID,
-    }),
-  );
-  return true;
+  const updatedWeekPrices = [...user.weekPrices];
+  updatedWeekPrices[day][time] = price;
+
+  const updatedUser = {
+    ...user,
+    weekPrices: updatedWeekPrices,
+  };
+
+  await client.setAsync(id, JSON.stringify(updatedUser));
+  return updatedUser;
 }
 
 module.exports = {
   addUser,
   getUser,
-  cleanUser,
-  updateUserSuggestedIslands,
-  getSuggestedIsland,
-  updateVisitingIsland,
-  updateQueue,
+  resetUser,
+  updatePreviousSellingPrice,
+  updateCurrentPattern,
+  updateBuyingPrice,
 };

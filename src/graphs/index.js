@@ -73,8 +73,8 @@ async function createChart(prices, possibilities) {
       labels: chartLabels,
     },
   };
-
-  const buffer = await canvasRenderService.renderToStream(chartConfiguration);
+ 
+  const buffer = await canvasRenderService.renderToBufferSync(chartConfiguration, 'image/jpeg');
   return buffer;
 }
 

@@ -1,30 +1,7 @@
 const Discord = require('discord.js');
 const discord = require('./discordUtils');
-const { calculateOutput } = require('../predictor');
+const redis = require('../utils/redis');
 const logger = require('../utils/logger');
-
-// Temporal
-const user = {
-  firstTimeBuyer: false,
-  previousPattern: 4,
-  previousSellingPrice: 106,
-  weekPrices: [
-    [92, 115],
-    [NaN, NaN],
-    [NaN, NaN],
-    [NaN, NaN],
-    [NaN, NaN],
-    [NaN, NaN],
-  ],
-  /* weekPrices: [
-    [92, 87],
-    [85, 82],
-    [77, 72],
-    [68, 64],
-    [59, 54],
-    [51, 45],
-  ], */
-};
 
 const tokenDiscord = process.env['DISCORD_TOKEN'];
 const botPrefix = process.env['BOT_PREFIX'];
@@ -39,25 +16,36 @@ client.on('message', async message => {
   try {
     if (!message.content.startsWith(botPrefix) || message.author.bot) return;
 
-    // TODO: Change this to new functions
-    // const user = await discord.prepareUser(message);
-    // const params = await discord.getParams(message, user.id);
+    const user = await discord.prepareUser(message);
+    const params = await discord.getParams(message, user.id);
 
-    // TODO: React to params.
+    switch (params.mode) {
+      case 'buying': {
+        await redis.updateBuyingPrice(user.id, params.day, params.time, params.price);
+        break;
+      }
+      case 'selling': {
+        await redis.updatePreviousSellingPrice(user.id, params.price);
+        break;
+      }
+      case 'reset': {
+        await redis.resetUser(user.id, params.price, params.pattern);
+        break;
+      }
+      case 'me': {
+        break;
+      }
+      case 'help':
+      default:
+        message.reply('Mensaje de ayuda.');
+        return;
+    }
 
-    const { graph, patterns } = await calculateOutput(
-      user.firstTimeBuyer,
-      user.previousPattern,
-      user.previousSellingPrice,
-      user.weekPrices,
-    );
-
-    const patternMsg = discord.preparePatternMessage(patterns);
-
-    const graphAttachment = new Discord.MessageAttachment(graph);
-    message.reply(patternMsg, graphAttachment);
+    const { message: patternMessage, graphAttachment } = await discord.patternMessage(user.id);
+    message.reply(patternMessage, graphAttachment);
   } catch (error) {
-    message.reply('Hubo un error. ¿Estan bien tus valores?');
+    message.reply('Hubo un problema. ¿Necesitas ayuda? Prueba con !juana help');
+    console.error(error);
   }
 });
 
