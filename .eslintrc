@@ -1,4 +1,7 @@
 {
+  "globals": {
+    "i18next": true
+  },
   "extends": [
     "eslint:recommended"
   ],
