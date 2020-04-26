@@ -36,9 +36,11 @@ client.on('message', async message => {
         break;
       }
       case 'help':
-      default:
-        message.reply('Mensaje de ayuda.');
+      default: {
+        const helpMessage = discord.helpMessage();
+        message.reply(helpMessage);
         return;
+      }
     }
 
     const { message: patternMessage, graphAttachment } = await discord.patternMessage(user.id);
