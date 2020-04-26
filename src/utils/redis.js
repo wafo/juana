@@ -1,6 +1,8 @@
 const redis = require('redis');
 const bluebird = require('bluebird');
 
+const hashKey = process.env['REDIS_HASH_KEY'];
+
 bluebird.promisifyAll(redis);
 
 const client = redis.createClient(process.env.REDIS_PORT, process.env.REDIS_HOST);
@@ -28,12 +30,12 @@ async function addUser(id, name) {
     id: id,
     name: name,
   };
-  await client.setAsync(id, JSON.stringify(newUser));
+  await client.hsetAsync(hashKey, id, JSON.stringify(newUser));
   return newUser;
 }
 
 async function getUser(id) {
-  const user = await client.getAsync(id);
+  const user = await client.hgetAsync(hashKey, id);
   return JSON.parse(user);
 }
 
@@ -49,7 +51,7 @@ async function resetUser(id, previousSellingPrice, pattern) {
     weekPrices: userBase.weekPrices,
   };
 
-  await client.setAsync(id, JSON.stringify(resetedUser));
+  await client.hsetAsync(hashKey, id, JSON.stringify(resetedUser));
   return resetedUser;
 }
 
@@ -61,7 +63,7 @@ async function updatePreviousSellingPrice(id, previousSellingPrice) {
     previousSellingPrice,
   };
 
-  await client.setAsync(id, JSON.stringify(updatedUser));
+  await client.hsetAsync(hashKey, id, JSON.stringify(updatedUser));
   return updatedUser;
 }
 
@@ -73,7 +75,7 @@ async function updateCurrentPattern(id, pattern) {
     currentPattern: pattern,
   };
 
-  await client.setAsync(id, JSON.stringify(updatedUser));
+  await client.hsetAsync(hashKey, id, JSON.stringify(updatedUser));
   return updatedUser;
 }
 
@@ -88,7 +90,7 @@ async function updateBuyingPrice(id, day, time, price) {
     weekPrices: updatedWeekPrices,
   };
 
-  await client.setAsync(id, JSON.stringify(updatedUser));
+  await client.hsetAsync(hashKey, id, JSON.stringify(updatedUser));
   return updatedUser;
 }
 
