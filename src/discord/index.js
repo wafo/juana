@@ -46,7 +46,7 @@ client.on('message', async message => {
     const { message: patternMessage, graphAttachment } = await discord.patternMessage(user.id);
     message.reply(patternMessage, graphAttachment);
   } catch (error) {
-    message.reply('Hubo un problema. ¿Necesitas ayuda? Prueba con !juana help');
+    message.reply('hubo un problema o no te entendi :sweat_smile:\nPrueba con !juana help');
     console.error(error);
   }
 });

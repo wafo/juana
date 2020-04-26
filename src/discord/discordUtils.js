@@ -36,6 +36,7 @@ async function getParams(message) {
   const params = message.content
     .slice(botPrefix.length)
     .trim()
+    .toLowerCase()
     .split(' ');
 
   switch (params[0]) {
@@ -109,7 +110,7 @@ function helpMessage() {
   msg = msg.concat(
     `Registra tu precio de compra. Usalo para registrar los precios de toda tú semana, mientras mas registes, más exacta la predicción.\n`,
   );
-  msg = msg.concat(`Los dias de la semana deben ir en minusculas y sin tildes, jeje.\n`);
+  msg = msg.concat(`Los dias de la semana deben ir sin tildes, jeje.\n`);
   msg = msg.concat(`*Ejemplo: !juana buying lunes am 115*\n\n`);
   msg = msg.concat(`**!juana selling [precio]**\n`);
   msg = msg.concat(
@@ -128,7 +129,7 @@ function helpMessage() {
   msg = msg.concat(`1: Pico alto\n`);
   msg = msg.concat(`2: Decreciente\n`);
   msg = msg.concat(`3: Pico moderado\n`);
-  msg = msg.concat(`4: No lo se\n`);
+  msg = msg.concat(`4: Desconocido\n`);
   msg = msg.concat('```');
   msg = msg.concat(`\n`);
 
