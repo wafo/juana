@@ -14,7 +14,7 @@ const canvasRenderService = new CanvasRenderService(1080, 400, ChartJS => {
   logger.server('Canvas initialized');
 });
 
-async function createChart(prices, possibilities) {
+async function createChart(prices, possibilities, spikes) {
   const chartLabels = [i18next.t('weekdays.sunday')].concat(
     ...[
       i18next.t('weekdays.abr.monday'),
@@ -57,23 +57,31 @@ async function createChart(prices, possibilities) {
           label: 'Minimo',
           data: possibilities.prices.slice(1).map(day => day.min),
           fill: false,
-          backgroundColor: 'rgba(255,90,95,.30)',
-          borderColor: 'rgba(255,90,95,.30)',
+          backgroundColor: 'rgba(255,0,0,.30)',
+          borderColor: 'rgba(255,0,0,.30)',
           cubicInterpolationMode: 'monotone',
         },
         {
           label: 'Máximo',
           data: possibilities.prices.slice(1).map(day => day.max),
           fill: '-1',
-          backgroundColor: 'rgba(8,126,139,.30)',
-          borderColor: 'rgba(8,126,139,.30)',
+          backgroundColor: 'rgba(0,0,255,.30)',
+          borderColor: 'rgba(0,0,255,.30)',
+          cubicInterpolationMode: 'monotone',
+        },
+        {
+          label: 'Picos',
+          data: spikes,
+          fill: '-1',
+          backgroundColor: 'rgba(0,255,0,.10)',
+          borderColor: 'rgba(0,255,0,.10)',
           cubicInterpolationMode: 'monotone',
         },
       ],
       labels: chartLabels,
     },
   };
- 
+
   const buffer = await canvasRenderService.renderToBufferSync(chartConfiguration, 'image/jpeg');
   return buffer;
 }
