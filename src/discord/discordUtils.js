@@ -94,7 +94,7 @@ async function patternMessage(id) {
   let msg = `estas son las predicciones:\n`;
   msg = msg.concat(`**Patrón más probable:** ${mostLikely.pattern_description} con ${percent}%\n`);
   msg = msg.concat(`**Mínimo garantizado:** ${average.weekGuaranteedMinimum}\n`);
-  msg = msg.concat(`**Máximo potencial:** ${average.weekMax}\n`);
+  msg = msg.concat(`**Máximo: ** Potencial: ${average.weekMax} | Patrón: ${mostLikely.weekMax}\n`);
   msg = msg.concat('\n');
 
   return {

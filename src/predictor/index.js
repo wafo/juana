@@ -15,7 +15,7 @@ async function calculateOutput(firstTimeBuyer, previousPattern, previousSellingP
   // First element of array is the average
   const mostLikely = analyzedPossibilities.slice(1).sort((a, b) => b.probability - a.probability)[0];
 
-  const graph = await createChart(prices, analyzedPossibilities);
+  const graph = await createChart(prices, mostLikely);
 
   return {
     graph,

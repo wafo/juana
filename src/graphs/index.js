@@ -55,7 +55,7 @@ async function createChart(prices, possibilities) {
         },
         {
           label: 'Minimo',
-          data: possibilities[0].prices.slice(1).map(day => day.min),
+          data: possibilities.prices.slice(1).map(day => day.min),
           fill: false,
           backgroundColor: 'rgba(255,90,95,.30)',
           borderColor: 'rgba(255,90,95,.30)',
@@ -63,7 +63,7 @@ async function createChart(prices, possibilities) {
         },
         {
           label: 'Máximo',
-          data: possibilities[0].prices.slice(1).map(day => day.max),
+          data: possibilities.prices.slice(1).map(day => day.max),
           fill: '-1',
           backgroundColor: 'rgba(8,126,139,.30)',
           borderColor: 'rgba(8,126,139,.30)',
