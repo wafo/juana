@@ -12,7 +12,7 @@
     "axios": "^0.19.2",
     "bluebird": "^3.7.2",
     "chalk": "^4.0.0",
-    "chart.js": "^2.9.3",
+    "chart.js": "^2.9.4",
     "chartjs-node-canvas": "^3.0.6",
     "discord.js": "^12.1.1",
     "dotenv": "^8.2.0",
